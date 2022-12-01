@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Só Eu Ganho</title>
+</head>
+<script src="assets/js/jquery-3.6.1.min.js"></script>
+<style>
+    .board {
+        max-width: 800px;
+    }
+
+    .line {
+        text-align: center;
+    }
+    .piece {
+        display: inline-block;
+        margin: 1rem;
+    }
+    .piece.selected {
+        outline: solid 2px red;
+        z-index: 999;
+    }
+    .piece img {
+        max-height: 150px;
+    }
+
+    .piece-style-0 {
+        transform: rotate(-15deg);
+    }
+
+    .piece-style-1 {
+        transform: rotate(-10deg);
+    }
+
+    .piece-style-2 {
+        transform: rotate(-5deg);
+    }
+
+    .piece-style-3 {
+        transform: rotate(5deg);
+    }
+
+    .piece-style-4 {
+        transform: rotate(10deg);
+    }
+
+    .piece-style-5 {
+        transform: rotate(10deg);
+    }
+    header {
+        text-align: center;
+    }
+
+    main {
+        display: block;
+        background-color: #f5f5f5;
+        text-align: center;
+    }
+    aside {
+        display: inner-block;;
+        background-color: #8a8a8a;
+        text-align: center;
+    }
+</style>
+</style>
+<body>
+    <header>
+        <h1>Só eu ganho!</h1>
+    </header>
+    <main>
+        <div class="board">
+        </div>
+        <button id="btn-reset">Reset</button>
+        <button id="btn-play">Play</button>
+    </main>
+    <aside>
+        <div class="pannel">
+            É a vez do <span id="jogador"></span>.
+            <br><br>
+        </div>
+    </aside>
+    <script src="assets/js/jogo.js"></script>
+</body>
+</html>
