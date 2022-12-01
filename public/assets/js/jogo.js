@@ -2,6 +2,9 @@
 const soEuGanho = {
     PLAYER_ONE: 1,
     PLAYER_COMPUTER: 2,
+    animationStatus: {
+        numberOfItens: 0,  
+    },
     gameStatus: {
         gameId: '',
         currentPlaying: 1, /* 1 = player, 2 = computer */
@@ -30,19 +33,20 @@ const soEuGanho = {
     init: function() {
         self = this;
         $('#btn-reset').click(function() {
-            self.newGame();
+            self.btnResetAction();
         });
         $('#btn-play').click(function(e) {
             self.playButtonAction();
         });
 
-        self.newGame();
+        this.resetBoardAndCallNewGame();
+
+    },
+    btnResetAction: function() {
+        this.resetBoardAndCallNewGame();
     },
     newGame: function() {
-
         this.gameStatus.gameId = null;
-
-        this.resetBoard();
 
         self = this;
 
@@ -78,7 +82,13 @@ const soEuGanho = {
     },
     playIfItsComputerRound: function() {
         if( this.gameStatus.currentPlaying == this.PLAYER_COMPUTER ) {
-            this.computerPlay();
+            self = this;
+
+            var randomTime = Math.floor(Math.random() * 500);
+
+            setTimeout(function(){
+                self.computerPlay()
+            }, randomTime);
         }
     },
     playButtonAction: function() {
@@ -86,7 +96,6 @@ const soEuGanho = {
         self.play();
     },
     play: function() {
-
         let selectedItems = $('.piece.selected')
         if( selectedItems.length == 0 ) {
             window.alert("Você deve selecionar pelo menos uma peça para jogar!");
@@ -94,6 +103,10 @@ const soEuGanho = {
         }
 
         this.removeSelectedPieces();
+        
+    },
+    piecesRemoved: function() {
+
         if( this.isTheGameOver() ) {
             this.gameOver();
             return;
@@ -102,7 +115,6 @@ const soEuGanho = {
         this.updateGameStatistics();
         this.switchPlayer();
         this.showGameStatistics();
-        
     },
     updateGameStatistics: function() {
         this.boardStatus = this.getBoardStatus();
@@ -110,10 +122,33 @@ const soEuGanho = {
         
     },
     removeSelectedPieces: function () {
+        self = this;
+
         let selectedItems = $('.piece.selected')
+
+        this.animationStatus.numberOfItens = selectedItems.length;
+
+        let direction = this.gameStatus.currentPlaying == this.PLAYER_ONE ? 'Left' : 'Right';
+        
+        selectedItems.each(function(index, item) {
+            randomTime = Math.floor(Math.random() * 500);
+            setTimeout( () => $(item).addClass('animate__animated').addClass('animate__zoomOut'+direction), randomTime);
+            $(item).on('animationend', (e) => {
+                $(e.currentTarget).unbind('animationend');
+                $(e.currentTarget).removeClass('animate__animated').removeClass('animate__zoomOut'+direction);
+                $(e.currentTarget).remove();
+                self.animationStatus.numberOfItens--;
+                if( self.animationStatus.numberOfItens == 0 ) {
+                    self.piecesRemoved();
+                }
+            });
+        });
+            
+        /**
         selectedItems.each(function() {
             $(this).remove();
         });
+        */
         this.gameStatus.selectedLine = null;
     },
     isTheGameOver: function() {
@@ -127,6 +162,9 @@ const soEuGanho = {
             this.gameStatus.computerScore++;
         }
 
+        $('#player1-score').html(this.gameStatus.playerScore);
+        $('#computer-score').html(this.gameStatus.computerScore);
+
         self = this
 
         window.alert( "Game over!!! " + playerName + " ganhou!");
@@ -139,7 +177,8 @@ const soEuGanho = {
                 winnerPlayerNumber: self.gameStatus.currentPlaying,
             },
             success: function(data) {
-                self.newGame();
+                self.resetBoardAndCallNewGame();
+                // self.newGame();
             }
         })
 
@@ -168,18 +207,36 @@ const soEuGanho = {
         let line = $('.line').eq(move.line);
         linePieces = line.find('.piece');
         linePieces.sort(() => (Math.random() > .5) ? 1 : -1);
+        totalComputerTime = 0;
         for( let i = 0; i < move.pieces; i++ ) {
-            $(linePieces[i]).addClass('selected');
+            // random time bewteen 0 and 500
+            let randomTime = Math.floor(Math.random() * 500);
+            totalComputerTime += randomTime;
+            setTimeout(() => $(linePieces[i]).addClass('selected'), randomTime );
+
         }
-        this.play();        
+        setTimeout(() => this.play(), totalComputerTime + 500);
+        // this.play();        
     },
-    resetBoard: function() {
+    resetBoardAndCallNewGame: function() {
         this.clearBoard();
         this.addLines();
     },
     showGameStatistics: function() {
         // Current player
-        $('#jogador').html(this.gameStatus.currentPlaying == this.PLAYER_ONE ? 'Jogador 1' : 'Computador');
+        // $('#jogador').html(this.gameStatus.currentPlaying == this.PLAYER_ONE ? 'Jogador 1' : 'Computador');
+        $('#turn-area').removeClass('d-none');
+
+        if( this.gameStatus.currentPlaying == this.PLAYER_ONE ) {
+            $('#computer-turn-alert').hide();
+            $('#player-one-turn-alert').show();
+            $('#btn-play').prop('disabled', false);
+        } else {
+            $('#computer-turn-alert').show();
+            $('#player-one-turn-alert').hide();
+            $('#btn-play').prop('disabled', true);
+        }
+
     },
     getBoardStatus: function() {
         let boardStatus = [];
@@ -192,7 +249,11 @@ const soEuGanho = {
     clearBoard: function() {
         $('.board').html('');
     },
+    allLinesAddedSoCallNewGame: function() {
+        this.newGame();
+    },
     addLines: function() {
+        this.animationStatus.numberOfItens = 12; // 3+4+5
         this.addLine(3);
         this.addLine(4);
         this.addLine(5);
@@ -201,12 +262,25 @@ const soEuGanho = {
         let lineId = this.nextLineId();
         let line = $(`<div class="line" id=${lineId}></div>`);
         for (let i = 0; i < numberOfItens; i++) {
-            randomImage = this.getRandomPieceImage();
-            randomStyle = this.getRandomPieceStyle();
-            piece = $('<div class="piece '+randomStyle+'"><img src="'+randomImage+'"></div>').on('click', this.selectPiece)
-            line.append(piece);
+            randomTime = Math.floor(Math.random() * 500);
+            setTimeout( () => line.append(this.addPiece(line)), randomTime);
         }
         $('.board').append(line);
+    },
+    addPiece: function(line) {
+        randomImage = this.getRandomPieceImage();
+        randomStyle = this.getRandomPieceStyle();
+        piece = $('<div class="piece '+randomStyle+'"><img src="'+randomImage+'" class="animate__animated animate__bounceIn"></div>').on('click', this.selectPiece)
+        self = this;
+        $(piece).on('animationend', (e) => {
+            $(e.currentTarget).unbind('animationend');
+            $(e.currentTarget).removeClass('animate__animated').removeClass('animate__bounceIn');
+            self.animationStatus.numberOfItens--;
+            if( self.animationStatus.numberOfItens == 0 ) {
+                self.allLinesAddedSoCallNewGame();
+            }
+        });
+        line.append(piece);
     },
     markAsSelected: function(target) {
 
