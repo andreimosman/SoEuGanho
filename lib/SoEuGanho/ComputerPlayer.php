@@ -100,12 +100,37 @@ class ComputerPlayer implements IPlayer
         return $randomMove;
     }
 
+    public function getRandomMoveConsideringWeight($board): array
+    {
+        $moves = $this->getRankedMoves($board) ?? $this->createRankedMoves($board);
+
+        $sum = 0;
+
+        $moves = array_map(function($move) use (&$sum) {
+            $sum += $move['rating'];
+            $move['weight'] = $sum;
+            return $move;
+        }, $moves);
+
+        $randomIndex = mt_rand(0, $sum+1);
+
+        $movesInTheZone = array_filter($moves, function($move) use ($randomIndex) {
+            return $move['weight'] <= $randomIndex;
+        });
+
+        $selectedMove = $movesInTheZone[ count($movesInTheZone)-1 ] ?? $moves[0] ?? [];
+
+        return $selectedMove;
+    }
+
     public function learnedPlay($board): array
     {
-        $possibleMoves = $this->getPossibleMoves($board);
-        // TODO: Consider weight into the random selection
-        $randomMove = $possibleMoves[array_rand($possibleMoves)];
-        return $randomMove;
+        $move = $this->getRandomMoveConsideringWeight($board);
+
+        $theMove = $move['move'] ?? [];
+        // $theMove['rating'] = $move['rating'];
+
+        return $theMove;
     }
 
     public function play(array $board): array
