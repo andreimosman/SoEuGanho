@@ -129,7 +129,7 @@ class ComputerPlayer implements IPlayer
 
     public function learn(bool $win): void
     {
-        $history = $this->getHistory();
+        $history = $this->getHistory() ?? [];
 
         foreach($history as $move) {
             $rating = $win ? self::REWARD_POINTS : self::PENALTY_POINTS;
