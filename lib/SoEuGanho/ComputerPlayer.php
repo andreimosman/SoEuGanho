@@ -9,6 +9,8 @@ class ComputerPlayer implements IPlayer
     private $gameId;
     private $playerNumber;
 
+    private $training = false;
+
     const COMPUTER_PLAYER_NUMBER = 2;
 
     const REWARD_POINTS = 3;
@@ -21,9 +23,14 @@ class ComputerPlayer implements IPlayer
         $this->playerNumber = $playerNumber ?? self::COMPUTER_PLAYER_NUMBER;
     }
 
+    public function setTraining(bool $training = true): void
+    {
+        $this->training = $training;
+    }
+
     public function start(?int $playerNumber): string
     {
-        $playerNumber ??= 2; // Computer
+        $playerNumber ??= self::COMPUTER_PLAYER_NUMBER; // Computer
 
         $this->gameId = uniqid();
         $this->playerNumber = $playerNumber;
@@ -63,12 +70,14 @@ class ComputerPlayer implements IPlayer
         return empty($value) ? null : json_decode(json_encode($value),true);;
     }
 
-    public function getRankedMoves($board): ?array {
+    public function getRankedMoves($board, $sort = 1): ?array {
         $filter = [
             'board' => array_map(fn($pieces) => (int) $pieces, $board),
         ];
 
-        $moves = $this->db->selectCollection('soeuganho', 'moves')->find($filter);
+        $moves = $this->db
+            ->selectCollection('soeuganho', 'moves')
+            ->find($filter, ['sort' => ['rating' => $sort]]);
         
         return self::toFullArrayOrNull($moves->toArray());
     }
@@ -112,7 +121,7 @@ class ComputerPlayer implements IPlayer
             return $move;
         }, $moves);
 
-        $randomIndex = mt_rand(0, $sum+1);
+        $randomIndex = $sum > 0 ? mt_rand(0, $sum+1) : 0;
 
         $movesInTheZone = array_filter($moves, function($move) use ($randomIndex) {
             return $move['weight'] <= $randomIndex;
@@ -133,10 +142,24 @@ class ComputerPlayer implements IPlayer
         return $theMove;
     }
 
+    public function selectTheBestMove($board): array
+    {
+        $moves = $this->getRankedMoves(board: $board, sort: -1) ?? $this->createRankedMoves($board);
+
+        $bestMove = $moves[0] ?? [];
+
+        return $bestMove['move'] ?? [];
+    }
+
     public function play(array $board): array
     {
         // Todo: implement a better strategy
-        $move = $this->learnedPlay($board);
+        if( $this->training ) {
+            $move = $this->learnedPlay($board);
+        } else {
+            $move = $this->selectTheBestMove($board);
+        }
+        
         $this->addHistory($board, $move);
         return $move;
     }

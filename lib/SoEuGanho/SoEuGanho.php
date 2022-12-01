@@ -11,9 +11,13 @@ class SoEuGanho
     public static function getPossibleMoves(array $board): array
     {
         if(count($board) > self::MAX_LINES) return []; // Invalid board
+        $totalPieces = array_sum($board);
+
+        if( $totalPieces == 1 ) return [];
 
         $playableLines = array_filter($board, fn($line) => $line > 0 && $line <= self::MAX_PIECES_PER_LINE);
         $numberOfPlayableLines = count($playableLines);
+
 
         $possibleMoves = [];
 
