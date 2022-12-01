@@ -40,6 +40,8 @@ const soEuGanho = {
     },
     newGame: function() {
 
+        this.gameStatus.gameId = null;
+
         this.resetBoard();
 
         self = this;
