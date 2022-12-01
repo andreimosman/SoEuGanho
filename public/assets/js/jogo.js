@@ -108,12 +108,14 @@ const soEuGanho = {
     piecesRemoved: function() {
 
         if( this.isTheGameOver() ) {
+            this.switchPlayer(); // Switch back to the player that won
             this.gameOver();
             return;
         }
 
         this.updateGameStatistics();
-        this.switchPlayer();
+        
+        this.playIfItsComputerRound();
         this.showGameStatistics();
     },
     updateGameStatistics: function() {
@@ -122,6 +124,9 @@ const soEuGanho = {
         
     },
     removeSelectedPieces: function () {
+
+        this.switchPlayer();
+
         self = this;
 
         let selectedItems = $('.piece.selected')
@@ -156,10 +161,13 @@ const soEuGanho = {
     },
     gameOver: function() {
         var playerName = this.gameStatus.currentPlaying == this.PLAYER_ONE ? 'Player 1' : 'Computer';
+        var winnerPlayerNumber = 0;
         if( this.gameStatus.currentPlaying == this.PLAYER_ONE ) {
             this.gameStatus.playerScore++;
+            winnerPlayerNumber = this.PLAYER_ONE;
         } else {
             this.gameStatus.computerScore++;
+            winnerPlayerNumber = this.PLAYER_COMPUTER;
         }
 
         $('#player1-score').html(this.gameStatus.playerScore);
@@ -174,7 +182,7 @@ const soEuGanho = {
             type: 'POST',
             data: {
                 gameId: self.gameStatus.gameId,
-                winnerPlayerNumber: self.gameStatus.currentPlaying,
+                winnerPlayerNumber: winnerPlayerNumber,
             },
             success: function(data) {
                 self.resetBoardAndCallNewGame();
@@ -187,7 +195,6 @@ const soEuGanho = {
     },
     switchPlayer: function() {
         this.gameStatus.currentPlaying = (this.gameStatus.currentPlaying == 1) ? 2 : 1;
-        this.playIfItsComputerRound();
     },
     computerPlay: function() {
         self = this;
@@ -307,8 +314,11 @@ const soEuGanho = {
         target.removeClass('selected');
         if( $('.piece.selected').length == 0 ) this.gameStatus.selectedLine = null;
     },
-    selectPiece: function(e) {
+    selectPiece: function(e) {        
+
         self = soEuGanho
+        if( self.gameStatus.currentPlaying != self.PLAYER_ONE ) return; // Ignora quando não é nossa vez
+
         let target = $(e.currentTarget);
         if (target.hasClass('selected')) {
             self.markAsUnselected(target);
