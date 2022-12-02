@@ -113,6 +113,11 @@ class ComputerPlayer implements IPlayer
     {
         $moves = $this->getRankedMoves($board) ?? $this->createRankedMoves($board);
 
+        // echo "Count: " . count($moves) . "\n";
+
+        /**
+        // Este método estava gerando menos ocorrências do que tem mais peso.
+
         $sum = 0;
 
         $moves = array_map(function($move) use (&$sum) {
@@ -121,13 +126,30 @@ class ComputerPlayer implements IPlayer
             return $move;
         }, $moves);
 
-        $randomIndex = $sum > 0 ? mt_rand(0, $sum+1) : 0;
+        $randomIndex = $sum > 0 ? mt_rand(0, $sum) : 0; 
 
         $movesInTheZone = array_filter($moves, function($move) use ($randomIndex) {
-            return $move['weight'] <= $randomIndex;
+            return $move['weight'] >= $randomIndex; // <=
         });
 
         $selectedMove = $movesInTheZone[ count($movesInTheZone)-1 ] ?? $moves[0] ?? [];
+
+        */
+
+        // Script alfaiate
+        // Begin remendo
+        $stringao = "";
+
+        foreach($moves as $i => $move) {
+            $stringao .= str_repeat(chr($i+65),$move['rating'] > 0 ? $move['rating'] : 1);
+        }
+
+        // echo "Stringao: " . $stringao . "\n";
+
+        $weightedIndexes = str_split($stringao);
+        $randomIndex = ord( $weightedIndexes[ rand(0, count($weightedIndexes)-1 ) ] ) - 65;
+
+        $selectedMove = $moves[$randomIndex] ?? $moves[0] ?? [];
 
         return $selectedMove;
     }
@@ -135,10 +157,7 @@ class ComputerPlayer implements IPlayer
     public function learnedPlay($board): array
     {
         $move = $this->getRandomMoveConsideringWeight($board);
-
         $theMove = $move['move'] ?? [];
-        // $theMove['rating'] = $move['rating'];
-
         return $theMove;
     }
 
@@ -154,11 +173,11 @@ class ComputerPlayer implements IPlayer
     public function play(array $board): array
     {
         // Todo: implement a better strategy
-        if( $this->training ) {
+        // if( $this->training ) {
             $move = $this->learnedPlay($board);
-        } else {
-            $move = $this->selectTheBestMove($board);
-        }
+        // } else {
+        //    $move = $this->selectTheBestMove($board);
+        // }
         
         $this->addHistory($board, $move);
         return $move;
