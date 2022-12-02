@@ -32,10 +32,10 @@ const soEuGanho = {
     },
     init: function() {
         self = this;
-        $('#btn-reset').click(function() {
+        $('.btn-reset').click(function() {
             self.btnResetAction();
         });
-        $('#btn-play').click(function(e) {
+        $('.btn-play').click(function(e) {
             self.playButtonAction();
         });
 
@@ -232,16 +232,16 @@ const soEuGanho = {
     showGameStatistics: function() {
         // Current player
         // $('#jogador').html(this.gameStatus.currentPlaying == this.PLAYER_ONE ? 'Jogador 1' : 'Computador');
-        $('#turn-area').removeClass('d-none');
+        $('.turn-area').removeClass('d-none');
 
         if( this.gameStatus.currentPlaying == this.PLAYER_ONE ) {
-            $('#computer-turn-alert').hide();
-            $('#player-one-turn-alert').show();
-            $('#btn-play').prop('disabled', false);
+            $('.computer-turn-alert').hide();
+            $('.player-one-turn-alert').show();
+            $('.btn-play').prop('disabled', false);
         } else {
-            $('#computer-turn-alert').show();
-            $('#player-one-turn-alert').hide();
-            $('#btn-play').prop('disabled', true);
+            $('.computer-turn-alert').show();
+            $('.player-one-turn-alert').hide();
+            $('.btn-play').prop('disabled', true);
         }
 
     },
