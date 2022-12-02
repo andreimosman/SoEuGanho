@@ -16,17 +16,24 @@
 
     .line {
         text-align: center;
+        display:flex;
+        justify-content: center;
     }
     .piece {
         display: inline-block;
         margin: 1rem;
+        flex: 0 1 auto;
+        min-width: 0;
+        max-height: 150px;
     }
-    .piece.selected {
+    .piece.selected img {
         outline: solid 2px red;
         z-index: 999;
     }
     .piece img {
-        max-height: 150px;
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
     }
 
     .piece-style-0 {
@@ -75,6 +82,12 @@
         width: 45%;
     }
 
+    @media (max-width: 575.98px) { 
+        .piece {
+            max-height: 100px;
+        }
+    }
+
 </style>
 </style>
 <body>
@@ -90,6 +103,18 @@
             </div>
             
             <div class="col-md-4">
+                <div class="text-center d-block d-sm-none">
+                    <button class="btn btn-lg btn-secondary btn-action" id="btn-reset">Reset</button>
+                    <button class="btn btn-lg btn-success btn-action" id="btn-play">Play</button>
+                    <div class="d-none" id="turn-area">
+                        <div id="player-one-turn-alert" class="alert alert-success" role="alert">
+                            Sua vez!
+                        </div>
+                        <div id="computer-turn-alert" class="alert alert-primary" role="alert">
+                            Hora do computador!
+                        </div>
+                    </div>
+                </div>
                 <div class="card">
                     <div class="card-header">
                         <h3>Placar</h3>
@@ -117,7 +142,7 @@
                         </div>
 
                     </div>
-                    <div class="card-footer text-center">
+                    <div class="card-footer d-none d-sm-block text-center">
                         <button class="btn btn-lg btn-outline-secondary btn-action" id="btn-reset">Reset</button>
                         <button class="btn btn-lg btn-success btn-action" id="btn-play">Play</button>        
                     </div>
