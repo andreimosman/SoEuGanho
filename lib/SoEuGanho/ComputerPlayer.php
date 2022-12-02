@@ -13,8 +13,9 @@ class ComputerPlayer implements IPlayer
 
     const COMPUTER_PLAYER_NUMBER = 2;
 
-    const REWARD_POINTS = 3;
+    const REWARD_POINTS = 1;
     const PENALTY_POINTS = -1;
+    const INITIAL_POINTS = 1;
 
     public function __construct(\MongoDB\Client $db = null, string $gameId = null, int $playerNumber = null)
     {
@@ -87,7 +88,7 @@ class ComputerPlayer implements IPlayer
             return [
                 'board' => array_map(fn($pieces) => (int) $pieces, $board),
                 'move' => $move,
-                'rating' => 3,
+                'rating' => self::INITIAL_POINTS,
             ];
         }, SoEuGanho::getPossibleMoves($board));
 
@@ -173,11 +174,11 @@ class ComputerPlayer implements IPlayer
     public function play(array $board): array
     {
         // Todo: implement a better strategy
-        // if( $this->training ) {
+        if( $this->training ) {
             $move = $this->learnedPlay($board);
-        // } else {
-        //    $move = $this->selectTheBestMove($board);
-        // }
+        } else {
+            $move = $this->selectTheBestMove($board);
+        }
         
         $this->addHistory($board, $move);
         return $move;
@@ -196,10 +197,19 @@ class ComputerPlayer implements IPlayer
 
     public function learn(bool $win): void
     {
+
+        // echo " * Learning from " . ($win ? "win" : "loss") . "...\n";
+
+
         $history = $this->getHistory() ?? [];
 
         foreach($history as $move) {
             $rating = $win ? self::REWARD_POINTS : self::PENALTY_POINTS;
+
+            // echo " ** Board: " . implode(',',$move['board']) . "\n";
+            // echo " ** Played: " . $move['move']['line'] . "," . $move['move']['pieces'] . "\n";
+            // echo " ** Inc: " . $rating . "\n";
+
             $board = $move['board'];
             $r = $this->db->selectCollection('soeuganho', 'moves')->updateOne(
                 [
@@ -214,6 +224,7 @@ class ComputerPlayer implements IPlayer
             );
         }
 
+        // echo "----------------------------\n";
         $this->saveResult($win);
     }
 

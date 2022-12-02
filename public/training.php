@@ -2,6 +2,11 @@
 
 require_once('computer.php');
 
+function debug_echo($output)
+{
+    echo $output;
+}
+
 
 function play_game($player1, $player2, $player1_starts) {
     $board = [3,4,5];
@@ -11,6 +16,7 @@ function play_game($player1, $player2, $player1_starts) {
         $player1_starts ? $player2 : $player1,
     ];
 
+    $player1->start(1); // Gera o id do jogo
     $player2->start(2); // Gera o id do jogo
 
     $count = 0;
@@ -20,35 +26,40 @@ function play_game($player1, $player2, $player1_starts) {
         $p = $players[$count % 2];
         $move = $p->play($board);
 
-        echo "Board: " . implode(', ', $board) . PHP_EOL;
+        debug_echo("Board: " . implode(', ', $board) . PHP_EOL);
 
         $board[ $move['line'] ] -= $move['pieces'];
 
-        echo "Player " . ($p->getPlayerNumber()) . " removed " . $move['pieces'] . " pieces from line " . ($move['line']+1) . "\n";
+        debug_echo("Player " . ($p->getPlayerNumber()) . " removed " . $move['pieces'] . " pieces from line " . ($move['line']+1) . "\n");
 
-        // echo "Possible moves: " . count(\SoEuGanho\SoEuGanho::getPossibleMoves($board)) . PHP_EOL;
+        // debug_echo("Possible moves: " . count(\SoEuGanho\SoEuGanho::getPossibleMoves($board)) . PHP_EOL);
         $count++;
     }
 
     $winnerPlayerNumber = $p->getPlayerNumber();
 
-    echo "Winner is player $winnerPlayerNumber\n";
-    echo "----------------------------\n";
+    debug_echo("Winner is player $winnerPlayerNumber\n");
+    debug_echo("----------------------------\n");
 
+    $player1->end( $winnerPlayerNumber );
     $player2->end( $winnerPlayerNumber );
 
 }
 
-$player->setTraining(true);
+$computerPlayer1 = new \SoEuGanho\ComputerPlayer(db: $db);
 
-$randomPlayer = new \SoEuGanho\RandomPlayer();
+$player->setTraining(true); // Player2 testa múltiplas possibilidades
+$computerPlayer1->setTraining(false); // player1 tenta as melhores
+
+debug_echo("<pre>");
+
+// return;
 
 
-$max_games = @$_REQUEST['max_games'] ?? 30;
+$games = @$_REQUEST['games'] ?? 1;
 
-echo "<pre>";
-for($i=0;$i<$max_games;$i++)
+for($i=0;$i<$games;$i++)
 {
-    play_game(player1: $randomPlayer, player2: $player, player1_starts: !((bool)($i % 2)));
+    play_game(player1: $computerPlayer1, player2: $player, player1_starts: !((bool)($i % 2)));
 }
 
