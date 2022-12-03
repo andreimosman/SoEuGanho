@@ -32,10 +32,10 @@ const soEuGanho = {
     },
     init: function() {
         self = this;
-        $('.btn-reset').click(function() {
+        $('#btn-reset').click(function() {
             self.btnResetAction();
         });
-        $('.btn-play').click(function(e) {
+        $('#btn-play').click(function(e) {
             self.playButtonAction();
         });
 
