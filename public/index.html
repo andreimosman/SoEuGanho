@@ -123,6 +123,11 @@
         width: calc(50% - 2rem);
     }
 
+    .vez-do-jogador {
+        outline: solid 4px green;
+        background: #a8e6a8;
+    }
+
     
     .btn-action {
         display: block;
@@ -190,18 +195,18 @@
             <div class="board"></div>
         </div>
         <div class="action-area">
-            <button class="btn btn-lg btn-success btn-action" id="btn-play">Play</button>
+            <button class="btn btn-lg btn-success btn-action" id="btn-play">Withdraw</button>
             <button class="btn btn-sm btn-action" id="btn-reset">Reset</button>
         </div>
         <div class="gap-area"></div>
         <div class="placar-area">
             <h3>Placar</h3>
                 <div class="row">
-                    <div class="col-6 m-3 p-3 text-center box-placar">
+                    <div class="col-6 m-3 p-3 text-center box-placar box-player-1">
                         <h6>Player 1</h6>
                         <h4 id="player1-score">0</h4>
                     </div>
-                    <div class="col-6 m-3 p-3 text-center box-placar">
+                    <div class="col-6 m-3 p-3 text-center box-placar box-player-2">
                         <h6>Computador</h6>
                         <h4 id="computer-score">0</h4>
                     </div>

@@ -77,6 +77,8 @@ const soEuGanho = {
             this.gameStatus.currentPlaying = this.PLAYER_ONE;
         }
 
+        this.showPlayerTurn();
+
         this.playIfItsComputerRound();
 
     },
@@ -113,6 +115,8 @@ const soEuGanho = {
             return;
         }
 
+        this.showPlayerTurn();
+
         this.updateGameStatistics();
         
         this.playIfItsComputerRound();
@@ -122,6 +126,15 @@ const soEuGanho = {
         this.boardStatus = this.getBoardStatus();
         this.gameStatus.numRowsLeft = this.boardStatus.filter( (item) => item > 0 ).length;
         
+    },
+    showPlayerTurn: function() {
+        if( soEuGanho.gameStatus.currentPlaying == 1 ) {
+            $('.box-player-2').removeClass('vez-do-jogador');
+            $('.box-player-1').addClass('vez-do-jogador');
+        } else {
+            $('.box-player-1').removeClass('vez-do-jogador');
+            $('.box-player-2').addClass('vez-do-jogador');
+        }
     },
     removeSelectedPieces: function () {
 
@@ -195,6 +208,7 @@ const soEuGanho = {
     },
     switchPlayer: function() {
         this.gameStatus.currentPlaying = (this.gameStatus.currentPlaying == 1) ? 2 : 1;
+        
     },
     computerPlay: function() {
         self = this;
