@@ -39,11 +39,6 @@ class ComputerPlayer implements IPlayer
         return $this->gameId;
     }
 
-    public function clearSessionRecord(): void
-    {
-        unset($_SESSION['soEuGanho']);
-    }
-
     public function addHistory($board, $move): void
     {
         $collection = $this->db->selectCollection('soeuganho', 'history');
@@ -114,8 +109,6 @@ class ComputerPlayer implements IPlayer
     {
         $moves = $this->getRankedMoves($board) ?? $this->createRankedMoves($board);
 
-        // echo "Count: " . count($moves) . "\n";
-
         /**
         // Este método estava gerando menos ocorrências do que tem mais peso.
 
@@ -142,14 +135,14 @@ class ComputerPlayer implements IPlayer
         $stringao = "";
 
         foreach($moves as $i => $move) {
-            $stringao .= str_repeat(chr($i+65),$move['rating'] > 0 ? $move['rating'] : 1);
+            if( $move['rating'] > 0 ) {
+                $stringao .= str_repeat(chr($i+65),$move['rating'] > 0 ? $move['rating'] : 1);
+            }
         }
 
-        // echo "Stringao: " . $stringao . "\n";
-
         $weightedIndexes = str_split($stringao);
-        $randomIndex = ord( $weightedIndexes[ rand(0, count($weightedIndexes)-1 ) ] ) - 65;
-
+        // $randoIndex = weigthed or random
+        $randomIndex = count( $weightedIndexes ) ? ord( $weightedIndexes[ rand(0, count($weightedIndexes)-1 ) ] ) - 65 : rand(0, count($moves)-1);
         $selectedMove = $moves[$randomIndex] ?? $moves[0] ?? [];
 
         return $selectedMove;
@@ -173,14 +166,13 @@ class ComputerPlayer implements IPlayer
 
     public function play(array $board): array
     {
-        // Todo: implement a better strategy
-        if( $this->training ) {
-            $move = $this->learnedPlay($board);
-        } else {
-            $move = $this->selectTheBestMove($board);
-        }
+        // if( $this->training ) {
+             $move = $this->learnedPlay($board); // Random with weight
+        // } else {
+        //    $move = $this->selectTheBestMove($board); // Best move
+        // }
         
-        $this->addHistory($board, $move);
+        $this->addHistory($board, $move); // The game history
         return $move;
     }
 
@@ -198,17 +190,10 @@ class ComputerPlayer implements IPlayer
     public function learn(bool $win): void
     {
 
-        // echo " * Learning from " . ($win ? "win" : "loss") . "...\n";
-
-
         $history = $this->getHistory() ?? [];
 
         foreach($history as $move) {
             $rating = $win ? self::REWARD_POINTS : self::PENALTY_POINTS;
-
-            // echo " ** Board: " . implode(',',$move['board']) . "\n";
-            // echo " ** Played: " . $move['move']['line'] . "," . $move['move']['pieces'] . "\n";
-            // echo " ** Inc: " . $rating . "\n";
 
             $board = $move['board'];
             $r = $this->db->selectCollection('soeuganho', 'moves')->updateOne(
@@ -224,7 +209,6 @@ class ComputerPlayer implements IPlayer
             );
         }
 
-        // echo "----------------------------\n";
         $this->saveResult($win);
     }
 
@@ -232,14 +216,66 @@ class ComputerPlayer implements IPlayer
     {
         $collection = $this->db->selectCollection('soeuganho', 'results');
 
+        $_SERVER ??= []; // For CLI
+
+        $remoteAddr = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? null;
+
         $collection->insertOne([
             'timestamp' => time(),
+            'remoteAddr' => $remoteAddr,
             'gameId' => $this->gameId,
             'win' => $win,
         ]);
     }
 
-    public function cleanHistory() {
+    public function machineLearningStats(): array
+    {
+        $results = $this->getResultsSummary();
+        $games = 0;
+        $wins = 0;
+        $losses = 0;
+
+        if( $results !== null ) 
+        {
+            foreach($results as $result) {
+                if( $result['_id'] ) {
+                    $wins += $result['count'];
+                } else {
+                    $losses += $result['count'];
+                }
+            }
+        }
+
+        $games = $wins + $losses;
+
+        return [
+            'games' => $games,
+            'wins' => $wins,
+            'losses' => $losses,
+            'winRate' => $games > 0 ? round( ($wins / $games) * 100, 2 ) : 0,
+        ];
+    }
+
+    public function getResultsSummary(): ?array
+    {
+        $collection = $this->db->selectCollection('soeuganho', 'results');
+
+        // Count total number of results and total number of wins = true
+        $results = $collection->aggregate([
+            [
+                '$group' => [
+                    '_id' => '$win',
+                    'count' => [
+                        '$sum' => 1,
+                    ],
+                ],
+            ],
+        ]);
+
+        return self::toFullArrayOrNull($results->toArray());
+    }
+
+    public function clearHistory() {
         $this->db->selectCollection('soeuganho', 'history')->deleteMany([
             'gameId' => $this->gameId,
         ]);
@@ -254,7 +290,7 @@ class ComputerPlayer implements IPlayer
     {
         $win = $winnerPlayerNumber === $this->playerNumber;
         $this->learn(win: $win);
-        $this->cleanHistory();
+        $this->clearHistory();
     }
        
 }
