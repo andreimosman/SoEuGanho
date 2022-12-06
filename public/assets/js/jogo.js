@@ -11,6 +11,12 @@ const soEuGanho = {
         lastStartUser: 2, /* Vai ser chamado e virar pro 1 */
         playerScore: 0,
         computerScore: 0,
+        machineLearningStatus: {
+            games: 0,
+            wins: 0,
+            loses: 0,
+            winRate: 0.0,
+        },
         selectedLine: null,
         lineId: 0,
         boardStatus: [0,0,0],
@@ -59,6 +65,7 @@ const soEuGanho = {
             success: function(data) {
 
                 self.gameStatus.gameId = data.gameId;
+                self.machineLearningStatus = data.machineLearning;
                 self.startGame();
 
             }
@@ -66,6 +73,7 @@ const soEuGanho = {
 
     },
     startGame: function() {
+        this.showMachineLearningStatus();
         this.showGameStatistics();
         this.updateGameStatistics();
 
@@ -243,6 +251,13 @@ const soEuGanho = {
         this.clearBoard();
         this.addLines();
     },
+    showMachineLearningStatus: function() {
+        // machineLearningStatus
+        $('#summary_games').text(this.machineLearningStatus.games);
+        $('#summary_wins').text(this.machineLearningStatus.wins);
+        $('#summary_losses').text(this.machineLearningStatus.losses);
+
+    },
     showGameStatistics: function() {
         // Current player
         // $('#jogador').html(this.gameStatus.currentPlaying == this.PLAYER_ONE ? 'Jogador 1' : 'Computador');
@@ -257,7 +272,6 @@ const soEuGanho = {
             $('.player-one-turn-alert').hide();
             $('.btn-play').prop('disabled', true);
         }
-
     },
     getBoardStatus: function() {
         let boardStatus = [];

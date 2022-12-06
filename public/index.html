@@ -27,14 +27,47 @@
             "header"
             "board"
             "action"
-            "gap"
-            "placar";
+            "placar"
+            "gap";
         margin: 0;
         padding: 1rem;
     }
 
     .header-area {
         grid-area: header;
+        position: relative;
+        display: flex;
+    }
+
+    .header-area > div {
+        display: flex;
+        margin: auto;
+        float: left;
+    }
+
+    .summary-area {
+        position: relative;
+        background: white;
+        float: right;
+        margin: 0.5rem 0 0.5rem auto!important;
+    }
+
+    .summary-area::before {
+        content: 'Global Stats';
+        position: absolute;
+        top: -0.5rem;
+        background: #2196f3;
+        padding: 0.1rem 0.5rem;
+        border: solid 1px white;
+        border-radius: 8px;
+        font-size: 11px;
+        color: white;
+        left: 0.5rem;
+    }
+
+    .summary-area label {
+        color: #2196F3;
+        display: inline-block;
     }
 
     .gap-area {
@@ -136,6 +169,7 @@
     }
 
 
+
     @media (min-width: 768px) {
         .game-area {
             max-width: 998px;
@@ -183,13 +217,17 @@
 
     }
 
-
-</style>
 </style>
 <body>
     <div class="game-area">
-        <div class="header-area text-center p-3 text-light">
-            <h1>Só Eu Ganho</h1>
+        <div class="header-area">
+            <div class="text-center p-3 text-light">
+                <h1>Só Eu Ganho</h1>
+            </div>
+            <div class="summary-area p-3">
+                        Games: <span id="summary_games">0</span> | 
+                        W/L: <span id="summary_wins">0</span> / <span id="summary_losses">0</span>
+            </div>
         </div>
         <div class="board-area">
             <div class="board"></div>
@@ -202,11 +240,11 @@
         <div class="placar-area">
             <h3>Placar</h3>
                 <div class="row">
-                    <div class="col-6 m-3 p-3 text-center box-placar box-player-1">
+                    <div class="col-6 m-3 p-1 ps-3 text-center box-placar box-player-1">
                         <h6>Player 1</h6>
                         <h4 id="player1-score">0</h4>
                     </div>
-                    <div class="col-6 m-3 p-3 text-center box-placar box-player-2">
+                    <div class="col-6 m-3 p-1 ps-3 text-center box-placar box-player-2">
                         <h6>Computador</h6>
                         <h4 id="computer-score">0</h4>
                     </div>
