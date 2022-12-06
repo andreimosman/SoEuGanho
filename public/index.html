@@ -19,6 +19,8 @@
         margin: 0;
     }
 
+    
+
     .game-area {
         display: grid;
         height: calc(100vh - 1rem);
@@ -45,11 +47,18 @@
         float: left;
     }
 
+    .header-area h1 {
+        font-size: calc(1.1rem + 1.5vw)
+    }
+
     .summary-area {
         position: relative;
         background: white;
         float: right;
         margin: 0.5rem 0 0.5rem auto!important;
+        padding: 1rem 0.6rem 0.6rem 0.6rem;
+        width: 50%;
+        max-width: 350px;
     }
 
     .summary-area::before {
@@ -76,6 +85,7 @@
 
     .board {
         width: 100%;
+        height: 100%;
     }
 
     .action-area {
@@ -93,6 +103,7 @@
         background: white;
         padding: 1rem;
         grid-area: board;
+        max-height: calc(100vh - 80px - 2rem);
     }
 
 
@@ -101,6 +112,8 @@
         background: white;
         height: 180px;
         padding: 1rem;
+
+        margin-top: 1rem;
         /** width: 400px; */
     }
 
@@ -111,11 +124,13 @@
     .line {
         text-align: center;
         height: 130px;
+        max-height: min(33%, 180px);
         padding-bottom: 1rem;
     }
 
     .piece {
         display: inline-block;
+        height: 100%;
     }
     .piece.selected {
         outline: solid 2px red;
@@ -166,11 +181,12 @@
         display: block;
         margin: auto;
         width: 90%;
+        margin-bottom: 1rem;
     }
 
 
 
-    @media (min-width: 768px) {
+    @media screen and (min-width: 768px) {
         .game-area {
             max-width: 998px;
             display: grid;
@@ -189,6 +205,7 @@
         .placar-area {
             height: unset;
             width: unset;
+            margin-top: unset;
         }
 
         .action-area {
@@ -202,9 +219,8 @@
         }
 
         .line {
-            height: 180px;
+            max-height: min(33%, 180px);
         }
-
 
         .piece {
             margin: 1rem;
@@ -212,7 +228,28 @@
 
         .piece img {
             max-width: 75px;
-            max-height: 150px;
+            height: 100%;
+            max-height: min(100%, 150px);
+            
+        }
+
+    }
+
+    @media screen and (max-height: 500px) {
+        .piece {
+            margin: 0.5rem;
+        }
+
+        .line {
+            padding-bottom: 0.5rem;
+        }
+
+        .piece img {
+            max-width: 50px;
+        }
+
+        .btn-action {
+            margin-bottom: 0;
         }
 
     }
@@ -224,9 +261,8 @@
             <div class="text-center p-3 text-light">
                 <h1>Só Eu Ganho</h1>
             </div>
-            <div class="summary-area p-3">
-                        Games: <span id="summary_games">0</span> | 
-                        W/L: <span id="summary_wins">0</span> / <span id="summary_losses">0</span>
+            <div class="summary-area text-center">
+                <strong>G/W/L:</strong> <span id="summary_games">0</span> / <span id="summary_wins">0</span> / <span id="summary_losses">0</span>
             </div>
         </div>
         <div class="board-area">
@@ -234,7 +270,7 @@
         </div>
         <div class="action-area">
             <button class="btn btn-lg btn-success btn-action" id="btn-play">Withdraw</button>
-            <button class="btn btn-sm btn-action" id="btn-reset">Reset</button>
+            <!-- button class="btn btn-sm btn-action" id="btn-reset">Reset</button -->
         </div>
         <div class="gap-area"></div>
         <div class="placar-area">
