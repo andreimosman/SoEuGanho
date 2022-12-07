@@ -13,9 +13,9 @@ class ComputerPlayer implements IPlayer
 
     const COMPUTER_PLAYER_NUMBER = 2;
 
-    const REWARD_POINTS = 1;
+    const REWARD_POINTS = 2;
     const PENALTY_POINTS = -1;
-    const INITIAL_POINTS = 1;
+    const INITIAL_POINTS = 4;
 
     public function __construct(\MongoDB\Client $db = null, string $gameId = null, int $playerNumber = null)
     {
@@ -187,29 +187,30 @@ class ComputerPlayer implements IPlayer
         return self::toFullArrayOrNull($history->toArray());
     }
 
+    public function updateMoveRating($board, $move, $rating)
+    {
+        $r = $this->db->selectCollection('soeuganho', 'moves')->updateOne(
+            [
+                'board' => array_map(fn($pieces) => (int) $pieces, $board),
+                'move' => $move,
+            ],
+            [
+                '$inc' => ['rating' => $rating,],
+            ]
+        );
+    }
+
     public function learn(bool $win): void
     {
 
         $history = $this->getHistory() ?? [];
+        $rating = $win ? self::REWARD_POINTS : self::PENALTY_POINTS;
 
         foreach($history as $move) {
-            $rating = $win ? self::REWARD_POINTS : self::PENALTY_POINTS;
-
-            $board = $move['board'];
-            $r = $this->db->selectCollection('soeuganho', 'moves')->updateOne(
-                [
-                    'board' => array_map(fn($pieces) => (int) $pieces, $board),
-                    'move' => $move['move'],
-                ],
-                [
-                    '$inc' => [
-                        'rating' => $rating,
-                    ],
-                ]
-            );
+            $this->updateMoveRating($move['board'], $move['move'], $rating);
         }
 
-        $this->saveResult($win);
+        
     }
 
     public function saveResult($win): void
@@ -290,6 +291,7 @@ class ComputerPlayer implements IPlayer
     {
         $win = $winnerPlayerNumber === $this->playerNumber;
         $this->learn(win: $win);
+        $this->saveResult($win);
         $this->clearHistory();
     }
        
