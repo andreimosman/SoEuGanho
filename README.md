@@ -14,6 +14,8 @@ Você só pode retirar peças de uma única linha por vês. Quantas peças quise
 
 Ganha quem deixar somente uma peça no tabuleiro.
 
+![screenshot](https://github.com/andreimosman/SoEuGanho/blob/main/screenshot.png?raw=true)
+
 ## Inspiração
 
 Essa ideia foi inspirada no jogo MANACE, um Machine Learning usando caixas de fósforo para aprender a jogar Jogo da Velha que conheci no canal Stand-up Maths:
